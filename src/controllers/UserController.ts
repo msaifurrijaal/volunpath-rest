@@ -49,9 +49,9 @@ const registerUser = async (req: Request, res: Response) => {
       });
 
       return res.status(201).json({
-        status: 201,
+        status: true,
         message: "User registered successfully",
-        user: {
+        data: {
           id: newUser.id,
           username: newUser.username,
           email: newUser.email,
@@ -76,9 +76,9 @@ const registerUser = async (req: Request, res: Response) => {
       });
 
       return res.status(201).json({
-        status: 201,
+        status: true,
         message: "User registered successfully",
-        user: {
+        data: {
           id: newUser.id,
           username: newUser.username,
           email: newUser.email,
@@ -93,9 +93,9 @@ const registerUser = async (req: Request, res: Response) => {
     }
 
     return res.status(201).json({
-      status: 201,
+      status: true,
       message: "User registered successfully",
-      user: {
+      data: {
         id: newUser.id,
         username: newUser.username,
         email: newUser.email,
@@ -108,7 +108,7 @@ const registerUser = async (req: Request, res: Response) => {
     });
   } catch (error) {
     return res.status(500).json({
-      status: 500,
+      status: false,
       message: "An error occurred while registering the user",
       error: error,
     });
@@ -120,13 +120,17 @@ const getAllUsers = async (req: Request, res: Response) => {
     const users = await prisma.user.findMany({
       include: {
         volunteerDetail: true,
-        organization: true,
+        organizationDetail: true,
       },
     });
-    return res.status(200).json(users);
+    return res.status(200).json({
+      status: true,
+      message: "Users retrieved successfully",
+      data: users,
+    });
   } catch (error) {
     return res.status(500).json({
-      status: 500,
+      status: false,
       message: "An error occurred while retrieving the users",
       error: error,
     });
