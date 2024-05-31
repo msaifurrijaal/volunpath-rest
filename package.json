@@ -18,6 +18,7 @@
     "bcrypt": "^5.1.1",
     "express": "^4.19.2",
     "nodemon": "^3.1.2",
+    "prisma": "^3.0.0",
     "validatorjs": "^3.22.1"
   },
   "devDependencies": {
