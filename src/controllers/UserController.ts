@@ -118,9 +118,20 @@ const registerUser = async (req: Request, res: Response) => {
 const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await prisma.user.findMany({
-      include: {
-        volunteerDetail: true,
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        fullname: true,
+        phone: true,
+        address: true,
+        city: true,
+        role: true,
+        status: true,
         organizationDetail: true,
+        volunteerDetail: true,
+        created_at: true,
+        updated_at: true,
       },
     });
     return res.status(200).json({

@@ -21,7 +21,6 @@ model User {
   status             Status
   organizationDetail OrganizationDetail?
   volunteerDetail    VolunteerDetail?
-  accessToken        String?
   created_at         DateTime            @default(now())
   updated_at         DateTime            @updatedAt
 
