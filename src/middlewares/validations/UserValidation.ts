@@ -128,6 +128,42 @@ const registerValidation = async (
   }
 };
 
+const loginValidation = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, password } = req.body;
+
+    const dataUser = { email, password };
+
+    const rulesUser: Rules = {
+      email: "required|email",
+      password: "required|min:8",
+    };
+
+    const validateUser = new Validator(dataUser, rulesUser);
+
+    if (validateUser.fails()) {
+      return res.status(400).json({
+        status: false,
+        message: "Bad Request",
+        errors: validateUser.errors,
+      });
+    }
+
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while validating the login data",
+      error: error,
+    });
+  }
+};
+
 export default {
   registerValidation,
+  loginValidation,
 };

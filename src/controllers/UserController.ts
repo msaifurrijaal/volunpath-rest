@@ -1,10 +1,70 @@
 import { Request, Response } from "express";
 import prisma from "../../prisma/client";
 import AuthHelper from "../helpers/AuthHelper";
+import Helper from "../helpers/Helper";
 
 const loginUser = async (req: Request, res: Response) => {
-  const login = await prisma.user.findUnique;
-  return res.json("Test");
+  try {
+    const { email, password } = req.body;
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        status: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const matched = await AuthHelper.passwordCompare(password, user.password);
+
+    if (!matched) {
+      return res.status(401).json({
+        status: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const dataUser = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+    };
+
+    const token = Helper.generateToken(dataUser);
+    const refreshToken = Helper.generateRefreshToken(dataUser);
+
+    const responseUser = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      fullname: user.fullname,
+      phone: user.phone,
+      address: user.address,
+      city: user.city,
+      token: token,
+      refreshToken: refreshToken,
+    };
+
+    return res.status(200).json({
+      status: true,
+      message: "Login Success",
+      data: responseUser,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while logging in the user",
+      error: error,
+    });
+  }
 };
 
 const registerUser = async (req: Request, res: Response) => {
@@ -115,6 +175,77 @@ const registerUser = async (req: Request, res: Response) => {
   }
 };
 
+const detailSelfUser = async (req: Request, res: Response) => {
+  try {
+    const authToken = req.headers["authorization"];
+    const token = authToken && authToken.split(" ")[1];
+
+    const decoded = Helper.extractToken(token!);
+    const email = decoded!.email;
+
+    if (!email) {
+      return res.status(401).json({
+        status: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "User retrieved successfully",
+      data: user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while retrieving the user",
+      error: error,
+    });
+  }
+};
+
+const detailUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "User retrieved successfully",
+      data: user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while retrieving the user",
+      error: error,
+    });
+  }
+};
+
 const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await prisma.user.findMany({
@@ -152,4 +283,6 @@ export default {
   loginUser,
   registerUser,
   getAllUsers,
+  detailSelfUser,
+  detailUser,
 };
