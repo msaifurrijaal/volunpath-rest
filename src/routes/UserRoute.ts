@@ -15,6 +15,11 @@ userRoutes.post(
   UserValidation.registerValidation,
   UserController.registerUser
 );
+userRoutes.post(
+  "/auth/logout",
+  Authorization.authenticate,
+  UserController.logoutUser
+);
 userRoutes.get(
   "/users",
   Authorization.authenticate,

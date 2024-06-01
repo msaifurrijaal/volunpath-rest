@@ -385,6 +385,21 @@ const getAllOrganizations = async (req: Request, res: Response) => {
   }
 };
 
+const logoutUser = async (req: Request, res: Response) => {
+  try {
+    return res.status(200).json({
+      status: true,
+      message: "Logout successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while logging out",
+      error: error,
+    });
+  }
+};
+
 export default {
   loginUser,
   registerUser,
@@ -393,4 +408,5 @@ export default {
   detailUser,
   getAllVolunteers,
   getAllOrganizations,
+  logoutUser,
 };
