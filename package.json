@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "ts-node src/seed.ts",
-    "dev": "npx nodemon",
-    "postinstall": "prisma generate"
+    "dev": "cross-env NODE_ENV=development npx nodemon",
+    "postinstall": "prisma generate && prisma migrate deploy"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +29,7 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.12.12",
     "@types/validatorjs": "^3.15.5",
+    "cross-env": "^7.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   }
