@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('admin', 'volunteer', 'mitra', 'super_admin');
+CREATE TYPE "Role" AS ENUM ('admin', 'volunteer', 'organization', 'super_admin');
 
 -- CreateEnum
 CREATE TYPE "Status" AS ENUM ('active', 'inactive');

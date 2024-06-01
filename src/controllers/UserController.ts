@@ -125,8 +125,8 @@ const registerUser = async (req: Request, res: Response) => {
       });
     }
 
-    if (role === "mitra") {
-      const newMitraDetail = await prisma.organizationDetail.create({
+    if (role === "organization") {
+      const newOrganizationDetail = await prisma.organizationDetail.create({
         data: {
           user_id: newUser.id,
           name: organizationDetail.name,
@@ -147,7 +147,7 @@ const registerUser = async (req: Request, res: Response) => {
           address: newUser.address,
           city: newUser.city,
           role: newUser.role,
-          organizationDetail: newMitraDetail,
+          organizationDetail: newOrganizationDetail,
         },
       });
     }
@@ -194,6 +194,21 @@ const detailSelfUser = async (req: Request, res: Response) => {
       where: {
         email: email,
       },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        fullname: true,
+        phone: true,
+        address: true,
+        city: true,
+        role: true,
+        status: true,
+        organizationDetail: true,
+        volunteerDetail: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
 
     if (!user) {
@@ -224,7 +239,23 @@ const detailUser = async (req: Request, res: Response) => {
       where: {
         id: parseInt(id),
       },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        fullname: true,
+        phone: true,
+        address: true,
+        city: true,
+        role: true,
+        status: true,
+        organizationDetail: true,
+        volunteerDetail: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
+
     if (!user) {
       return res.status(404).json({
         status: false,
@@ -279,10 +310,87 @@ const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
+const getAllVolunteers = async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        role: "volunteer",
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        fullname: true,
+        phone: true,
+        address: true,
+        city: true,
+        role: true,
+        status: true,
+        volunteerDetail: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    if (!users) {
+      return res.status(404).json({
+        status: false,
+        message: "Volunteers not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Volunteers retrieved successfully",
+      data: users,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while retrieving the users",
+      error: error,
+    });
+  }
+};
+
+const getAllOrganizations = async (req: Request, res: Response) => {
+  try {
+    const organizations = await prisma.organizationDetail.findMany({
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        focus: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+    if (!organizations) {
+      return res.status(404).json({
+        status: false,
+        message: "Organizations not found",
+      });
+    }
+    return res.status(200).json({
+      status: true,
+      message: "Organizations retrieved successfully",
+      data: organizations,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while retrieving the organizations",
+      error: error,
+    });
+  }
+};
+
 export default {
   loginUser,
   registerUser,
   getAllUsers,
   detailSelfUser,
   detailUser,
+  getAllVolunteers,
+  getAllOrganizations,
 };

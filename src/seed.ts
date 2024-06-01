@@ -41,16 +41,16 @@ async function main() {
     },
   });
 
-  const mitraUser = await prisma.user.create({
+  const organizationUser = await prisma.user.create({
     data: {
-      username: "mitraUser",
-      email: "mitra@example.com",
+      username: "organizationUser",
+      email: "organization@example.com",
       password: hashedPassword,
       fullname: "Mitra User",
       phone: "085712369713",
       address: "Jl. Indah No. 3",
       city: "Malang",
-      role: "mitra",
+      role: "organization",
       status: "active",
     },
   });
@@ -79,10 +79,10 @@ async function main() {
     },
   });
 
-  // Create OrganizationDetail for mitraUser
+  // Create OrganizationDetail for organizationUser
   await prisma.organizationDetail.create({
     data: {
-      user_id: mitraUser.id,
+      user_id: organizationUser.id,
       name: "Mitra Organization",
       address: "123 Mitra Street",
       focus: "Community Development",
@@ -92,7 +92,7 @@ async function main() {
   // Create Events
   const event1 = await prisma.event.create({
     data: {
-      organizer_id: mitraUser.id,
+      organizer_id: organizationUser.id,
       title: "Community Clean-Up",
       description: "Join us in cleaning up the local park.",
       date: new Date("2024-06-01T10:00:00Z"),
@@ -103,7 +103,7 @@ async function main() {
 
   const event2 = await prisma.event.create({
     data: {
-      organizer_id: mitraUser.id,
+      organizer_id: organizationUser.id,
       title: "Health Camp",
       description: "Providing free health check-ups for the community.",
       date: new Date("2024-06-15T09:00:00Z"),
