@@ -2,11 +2,7 @@ import express, { Request, Response } from "express";
 import rootRouter from "./routes";
 import dotenv from "dotenv";
 
-if (process.env.NODE_ENV !== "production") {
-  dotenv.config();
-} else {
-  dotenv.config({ path: ".env.production" });
-}
+dotenv.config();
 
 const app = express();
 app.use(express.json());

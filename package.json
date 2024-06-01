@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "ts-node src/seed.ts",
-    "dev": "cross-env NODE_ENV=development npx nodemon",
-    "postinstall": "prisma generate && prisma migrate deploy"
+    "dev": "npx nodemon",
+    "postinstall": "prisma generate && prisma migrate deploy && npm run seed"
   },
   "keywords": [],
   "author": "",
