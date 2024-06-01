@@ -80,10 +80,12 @@ model Event {
   location     String
   image        String?
   slots_needed Int
+  category_id  Int?
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
   organizer     User           @relation(fields: [organizer_id], references: [id], name: "OrganizerEvents")
+  category      CategoryEvent? @relation(fields: [category_id], references: [id])
   Registrations Registration[]
   Reports       Report[]
 
@@ -115,4 +117,16 @@ model Report {
   volunteer User  @relation(fields: [volunteer_id], references: [id])
 
   @@map("reports")
+}
+
+model CategoryEvent {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?  @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  events Event[]
+
+  @@map("category_events")
 }

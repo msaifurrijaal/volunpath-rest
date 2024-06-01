@@ -89,6 +89,20 @@ async function main() {
     },
   });
 
+  // Create CategoryEvents
+  const categories = await prisma.categoryEvent.createMany({
+    data: [{ name: "Education" }, { name: "Health" }, { name: "Environment" }],
+  });
+
+  // Fetch the category IDs
+  const educationCategory = await prisma.categoryEvent.findUnique({
+    where: { name: "Education" },
+  });
+
+  const healthCategory = await prisma.categoryEvent.findUnique({
+    where: { name: "Health" },
+  });
+
   // Create Events
   const event1 = await prisma.event.create({
     data: {
@@ -98,6 +112,7 @@ async function main() {
       date: new Date("2024-06-01T10:00:00Z"),
       location: "Central Park",
       slots_needed: 10,
+      category_id: educationCategory?.id, // Assign category ID
     },
   });
 
@@ -109,6 +124,7 @@ async function main() {
       date: new Date("2024-06-15T09:00:00Z"),
       location: "Community Center",
       slots_needed: 5,
+      category_id: healthCategory?.id, // Assign category ID
     },
   });
 

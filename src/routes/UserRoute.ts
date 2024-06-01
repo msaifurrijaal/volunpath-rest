@@ -35,15 +35,5 @@ userRoutes.get(
   Authorization.authenticate,
   UserController.detailUser
 );
-userRoutes.get(
-  "/volunteers",
-  Authorization.authenticate,
-  UserController.getAllVolunteers
-);
-userRoutes.get(
-  "/organizations",
-  Authorization.authenticate,
-  UserController.getAllOrganizations
-);
 
 export default userRoutes;
