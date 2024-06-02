@@ -24,9 +24,9 @@ model User {
   created_at         DateTime            @default(now())
   updated_at         DateTime            @updatedAt
 
-  Registrations Registration[]
+  Registrations Activity[]
   Reports       Report[]
-  Events        Event[]        @relation("OrganizerEvents")
+  Events        Event[]    @relation("OrganizerEvents")
 
   @@map("users")
 }
@@ -58,13 +58,14 @@ model VolunteerDetail {
 }
 
 model OrganizationDetail {
-  id         Int      @id @default(autoincrement())
-  user_id    Int      @unique
-  name       String
-  address    String   @db.VarChar(300)
-  focus      String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  user_id     Int      @unique
+  name        String
+  address     String   @db.VarChar(300)
+  focus       String
+  description String   @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   user User @relation(fields: [user_id], references: [id])
 
@@ -72,38 +73,64 @@ model OrganizationDetail {
 }
 
 model Event {
-  id           Int      @id @default(autoincrement())
-  organizer_id Int
-  title        String
-  description  String   @db.Text
-  date         DateTime
-  location     String
-  image        String?
-  slots_needed Int
-  category_id  Int?
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  id              Int         @id @default(autoincrement())
+  organizer_id    Int
+  title           String
+  description     String      @db.Text
+  additional_info String?     @db.Text
+  date            DateTime
+  location        String
+  image           String?
+  slots_needed    Int
+  slots_available Int
+  category_id     Int?
+  status          StatusEvent
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
 
   organizer     User           @relation(fields: [organizer_id], references: [id], name: "OrganizerEvents")
   category      CategoryEvent? @relation(fields: [category_id], references: [id])
-  Registrations Registration[]
+  Registrations Activity[]
   Reports       Report[]
 
   @@map("events")
 }
 
-model Registration {
-  id           Int      @id @default(autoincrement())
-  volunteer_id Int
-  event_id     Int
-  status       String
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+enum StatusEvent {
+  open_registration
+  in_progress
+  completed
+  cancelled
+}
+
+model Activity {
+  id              Int            @id @default(autoincrement())
+  volunteer_id    Int
+  event_id        Int
+  status          StatusActivity
+  statusPayment   StatusPayment
+  motivation      String         @db.Text
+  additional_info String?        @db.Text
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
 
   volunteer User  @relation(fields: [volunteer_id], references: [id])
   event     Event @relation(fields: [event_id], references: [id])
 
-  @@map("registrations")
+  @@map("activities")
+}
+
+enum StatusPayment {
+  pending
+  approved
+  cancelled
+}
+
+enum StatusActivity {
+  pending
+  approved
+  rejected
+  cancelled
 }
 
 model Report {

@@ -3,12 +3,13 @@ import * as bcrypt from "bcrypt";
 
 async function main() {
   // Delete all existing data
-  await prisma.registration.deleteMany({});
   await prisma.report.deleteMany({});
+  await prisma.activity.deleteMany({});
   await prisma.event.deleteMany({});
   await prisma.organizationDetail.deleteMany({});
   await prisma.volunteerDetail.deleteMany({});
   await prisma.user.deleteMany({});
+  await prisma.categoryEvent.deleteMany({});
 
   const hashedPassword = await bcrypt.hash("password", 10);
 
@@ -86,12 +87,21 @@ async function main() {
       name: "Mitra Organization",
       address: "123 Mitra Street",
       focus: "Community Development",
+      description:
+        "Mitra Organization focuses on community development projects.",
     },
   });
 
   // Create CategoryEvents
   const categories = await prisma.categoryEvent.createMany({
-    data: [{ name: "Education" }, { name: "Health" }, { name: "Environment" }],
+    data: [
+      { name: "Education", description: "Events related to education." },
+      { name: "Health", description: "Events related to health." },
+      {
+        name: "Environment",
+        description: "Events related to environmental conservation.",
+      },
+    ],
   });
 
   // Fetch the category IDs
@@ -112,7 +122,11 @@ async function main() {
       date: new Date("2024-06-01T10:00:00Z"),
       location: "Central Park",
       slots_needed: 10,
-      category_id: educationCategory?.id, // Assign category ID
+      slots_available: 10,
+      category_id: educationCategory?.id,
+      status: "open_registration",
+      image:
+        "https://res.cloudinary.com/df5zedkiz/image/upload/v1717301562/ogjfetkcpj0vfgcmqppc.jpg",
     },
   });
 
@@ -124,24 +138,34 @@ async function main() {
       date: new Date("2024-06-15T09:00:00Z"),
       location: "Community Center",
       slots_needed: 5,
-      category_id: healthCategory?.id, // Assign category ID
+      slots_available: 5,
+      category_id: healthCategory?.id,
+      status: "open_registration",
+      image:
+        "https://res.cloudinary.com/df5zedkiz/image/upload/v1717299213/ovhkjb3natpbsoyh3z0c.jpg",
     },
   });
 
   // Create Registrations
-  await prisma.registration.create({
+  await prisma.activity.create({
     data: {
       volunteer_id: volunteerUser.id,
       event_id: event1.id,
-      status: "registered",
+      status: "pending",
+      statusPayment: "pending",
+      motivation: "I want to contribute to keeping the environment clean.",
+      additional_info: "I will bring my own cleaning tools.",
     },
   });
 
-  await prisma.registration.create({
+  await prisma.activity.create({
     data: {
       volunteer_id: volunteerUser.id,
       event_id: event2.id,
-      status: "registered",
+      status: "pending",
+      statusPayment: "pending",
+      motivation: "I want to help provide health services to the community.",
+      additional_info: "I have experience in assisting medical professionals.",
     },
   });
 

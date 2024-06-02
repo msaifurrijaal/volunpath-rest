@@ -132,6 +132,7 @@ const registerUser = async (req: Request, res: Response) => {
           name: organizationDetail.name,
           address: organizationDetail.address,
           focus: organizationDetail.focus,
+          description: organizationDetail.description,
         },
       });
 

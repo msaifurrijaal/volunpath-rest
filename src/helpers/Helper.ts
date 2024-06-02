@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
 
 interface UserData {
-  name: string | null;
+  id: number | null;
+  username: string | null;
   email: string | null;
-  roleId: string | null;
-  verified: boolean | null;
-  active: boolean | null;
+  role: string | null;
+  status: string | null;
 }
 
 const responseData = (
