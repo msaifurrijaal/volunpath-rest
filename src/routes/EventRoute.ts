@@ -37,7 +37,7 @@ eventRoutes.patch(
   "/events/:id",
   Authorization.authenticate,
   Authorization.authorizeEventManage,
-  EventController.updateEvent
+  EventController.updateEventStatus
 );
 
 eventRoutes.delete(
@@ -45,6 +45,12 @@ eventRoutes.delete(
   Authorization.authenticate,
   Authorization.authorizeEventManage,
   EventController.deleteEvent
+);
+
+eventRoutes.get(
+  "/category-events",
+  Authorization.authenticate,
+  EventController.getAllCategoryEvents
 );
 
 export default eventRoutes;

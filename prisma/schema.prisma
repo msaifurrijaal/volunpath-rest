@@ -131,6 +131,7 @@ enum StatusActivity {
   approved
   rejected
   cancelled
+  quotaFull
 }
 
 model Report {
