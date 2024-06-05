@@ -90,4 +90,37 @@ const authorizeActivityManage = async (
   }
 };
 
-export default { authenticate, authorizeEventManage, authorizeActivityManage };
+const authorizeUserDelete = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const authToken = req.headers["authorization"];
+    const token = authToken && authToken.split(" ")[1];
+
+    const decoded = Helper.extractToken(token!);
+    const role = decoded!.role;
+
+    if (role !== "admin") {
+      return res.status(401).json({
+        status: false,
+        message: "Unauthorized",
+      });
+    }
+
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      errors: error,
+    });
+  }
+};
+
+export default {
+  authenticate,
+  authorizeEventManage,
+  authorizeActivityManage,
+  authorizeUserDelete,
+};

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "../../prisma/client";
 import AuthHelper from "../helpers/AuthHelper";
 import Helper from "../helpers/Helper";
+import cloudinary from "../config/cloudinary";
 
 const loginUser = async (req: Request, res: Response) => {
   try {
@@ -47,6 +48,7 @@ const loginUser = async (req: Request, res: Response) => {
       status: user.status,
       fullname: user.fullname,
       phone: user.phone,
+      image: user.image,
       address: user.address,
       city: user.city,
       token: token,
@@ -69,6 +71,12 @@ const loginUser = async (req: Request, res: Response) => {
 
 const registerUser = async (req: Request, res: Response) => {
   try {
+    let image = null;
+    if (req.file?.path) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      image = result.secure_url;
+    }
+
     const {
       username,
       email,
@@ -82,6 +90,8 @@ const registerUser = async (req: Request, res: Response) => {
       volunteerDetail,
     } = req.body;
 
+    console.log(req.body);
+
     const hashedPass = await AuthHelper.passwordHashing(password);
 
     const newUser = await prisma.user.create({
@@ -91,6 +101,7 @@ const registerUser = async (req: Request, res: Response) => {
         password: hashedPass,
         fullname,
         phone,
+        image,
         address,
         city,
         role,
@@ -176,6 +187,144 @@ const registerUser = async (req: Request, res: Response) => {
   }
 };
 
+const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: 404,
+        message: "User not found",
+      });
+    }
+
+    let image = user.image;
+
+    if (image) {
+      const urlParts = image.split("/");
+      const lastPart = urlParts[urlParts.length - 1];
+      const publicId = lastPart.split("/").slice(-1)[0].split(".")[0];
+
+      if (req.file && req.file.path) {
+        const result = await cloudinary.uploader.upload(req.file.path);
+        image = result.secure_url;
+
+        if (user.image) {
+          await cloudinary.uploader.destroy(publicId);
+        }
+      }
+    } else {
+      if (req.file && req.file.path) {
+        const result = await cloudinary.uploader.upload(req.file.path);
+        image = result.secure_url;
+      }
+    }
+
+    const {
+      username,
+      email,
+      fullname,
+      phone,
+      address,
+      city,
+      role,
+      organizationDetail,
+      volunteerDetail,
+    } = req.body;
+
+    const updateUser = await prisma.user.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        username,
+        email,
+        fullname,
+        phone,
+        image,
+        address,
+        city,
+        role,
+      },
+    });
+
+    const updateUserData = {
+      id: updateUser.id,
+      username: updateUser.username,
+      email: updateUser.email,
+      fullname: updateUser.fullname,
+      phone: updateUser.phone,
+      image: updateUser.image,
+      address: updateUser.address,
+      city: updateUser.city,
+      role: updateUser.role,
+    };
+
+    if (role === "volunteer") {
+      const updatedVolunteerDetail = await prisma.volunteerDetail.update({
+        where: {
+          user_id: updateUser.id,
+        },
+        data: {
+          skills: volunteerDetail.skills,
+          education: volunteerDetail.education,
+          other_details: volunteerDetail.other_details,
+        },
+      });
+
+      return res.status(200).json({
+        status: true,
+        message: "User updated successfully",
+        data: {
+          ...updateUserData,
+          volunteerDetail: updatedVolunteerDetail,
+        },
+      });
+    }
+
+    if (role === "organization") {
+      const updatedOrganizationDetail = await prisma.organizationDetail.update({
+        where: {
+          user_id: updateUser.id,
+        },
+        data: {
+          name: organizationDetail.name,
+          address: organizationDetail.address,
+          focus: organizationDetail.focus,
+          description: organizationDetail.description,
+        },
+      });
+
+      return res.status(200).json({
+        status: true,
+        message: "User updated successfully",
+        data: {
+          ...updateUserData,
+          organizationDetail: updatedOrganizationDetail,
+        },
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "User updated successfully",
+      data: updateUserData,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while updating the user",
+      error: error,
+    });
+  }
+};
+
 const detailSelfUser = async (req: Request, res: Response) => {
   try {
     const authToken = req.headers["authorization"];
@@ -201,6 +350,7 @@ const detailSelfUser = async (req: Request, res: Response) => {
         email: true,
         fullname: true,
         phone: true,
+        image: true,
         address: true,
         city: true,
         role: true,
@@ -246,6 +396,7 @@ const detailUser = async (req: Request, res: Response) => {
         email: true,
         fullname: true,
         phone: true,
+        image: true,
         address: true,
         city: true,
         role: true,
@@ -287,10 +438,47 @@ const getAllUsers = async (req: Request, res: Response) => {
         email: true,
         fullname: true,
         phone: true,
+        image: true,
         address: true,
         city: true,
         role: true,
         status: true,
+        organizationDetail: true,
+        volunteerDetail: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+    return res.status(200).json({
+      status: true,
+      message: "Users retrieved successfully",
+      data: users,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while retrieving the users",
+      error: error,
+    });
+  }
+};
+
+const getAllActiveUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        status: "active",
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        fullname: true,
+        phone: true,
+        image: true,
+        address: true,
+        city: true,
+        role: true,
         organizationDetail: true,
         volunteerDetail: true,
         created_at: true,
@@ -316,6 +504,7 @@ const getAllVolunteers = async (req: Request, res: Response) => {
     const users = await prisma.user.findMany({
       where: {
         role: "volunteer",
+        status: "active",
       },
       select: {
         id: true,
@@ -323,10 +512,10 @@ const getAllVolunteers = async (req: Request, res: Response) => {
         email: true,
         fullname: true,
         phone: true,
+        image: true,
         address: true,
         city: true,
         role: true,
-        status: true,
         volunteerDetail: true,
         created_at: true,
         updated_at: true,
@@ -356,12 +545,22 @@ const getAllVolunteers = async (req: Request, res: Response) => {
 
 const getAllOrganizations = async (req: Request, res: Response) => {
   try {
-    const organizations = await prisma.organizationDetail.findMany({
+    const organizations = await prisma.user.findMany({
+      where: {
+        role: "organization",
+        status: "active",
+      },
       select: {
         id: true,
-        name: true,
+        username: true,
+        email: true,
+        fullname: true,
+        phone: true,
+        image: true,
         address: true,
-        focus: true,
+        city: true,
+        role: true,
+        organizationDetail: true,
         created_at: true,
         updated_at: true,
       },
@@ -401,13 +600,146 @@ const logoutUser = async (req: Request, res: Response) => {
   }
 };
 
+const updatePassword = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body;
+    const user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    const hashedPass = await AuthHelper.passwordHashing(password);
+
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        password: hashedPass,
+      },
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while updating the password",
+      error: error,
+    });
+  }
+};
+
+const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.role === "volunteer") {
+      await prisma.volunteerDetail.deleteMany({
+        where: {
+          user_id: parseInt(id),
+        },
+      });
+    }
+
+    if (user.role === "organization") {
+      await prisma.organizationDetail.deleteMany({
+        where: {
+          user_id: parseInt(id),
+        },
+      });
+    }
+
+    const deletedUser = await prisma.user.delete({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while deleting the user",
+      error: error,
+    });
+  }
+};
+
+const softDeleteUser = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+    if (!user) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    const deletedUser = await prisma.user.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        status: "inactive",
+      },
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while deleting the user",
+      error: error,
+    });
+  }
+};
+
 export default {
   loginUser,
   registerUser,
   getAllUsers,
+  getAllActiveUsers,
   detailSelfUser,
   detailUser,
   getAllVolunteers,
   getAllOrganizations,
   logoutUser,
+  updatePassword,
+  deleteUser,
+  softDeleteUser,
+  updateUser,
 };

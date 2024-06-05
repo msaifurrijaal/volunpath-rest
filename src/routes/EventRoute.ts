@@ -2,6 +2,7 @@ import { Router } from "express";
 import EventController from "../controllers/EventController";
 import Authorization from "../middlewares/Authorization";
 import upload from "../middlewares/multer";
+import EventValidation from "../middlewares/validations/EventValidation";
 
 const eventRoutes: Router = Router();
 
@@ -16,6 +17,7 @@ eventRoutes.post(
   Authorization.authenticate,
   Authorization.authorizeEventManage,
   upload.single("image"),
+  EventValidation.createEventValidation,
   EventController.createEvent
 );
 

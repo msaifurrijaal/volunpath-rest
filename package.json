@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "ts-node src/seed.ts",
     "dev": "npx nodemon",
-    "postinstall": "prisma generate && prisma migrate deploy"
+    "postinstall": "prisma generate && prisma migrate reset --force --skip-seed && prisma migrate deploy && npm run seed"
   },
   "keywords": [],
   "author": "",
