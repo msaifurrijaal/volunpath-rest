@@ -269,6 +269,7 @@ const getAllCategoryEvents = async (req: Request, res: Response) => {
   }
 };
 
+
 export default {
   getAllEvents,
   createEvent,
