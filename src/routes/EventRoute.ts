@@ -6,11 +6,7 @@ import EventValidation from "../middlewares/validations/EventValidation";
 
 const eventRoutes: Router = Router();
 
-eventRoutes.get(
-  "/events",
-  Authorization.authenticate,
-  EventController.getAllEvents
-);
+eventRoutes.get("/events", EventController.getAllEvents);
 
 eventRoutes.post(
   "/events",
@@ -21,11 +17,7 @@ eventRoutes.post(
   EventController.createEvent
 );
 
-eventRoutes.get(
-  "/events/:id",
-  Authorization.authenticate,
-  EventController.getEventById
-);
+eventRoutes.get("/events/:id", EventController.getEventById);
 
 eventRoutes.put(
   "/events/:id",
