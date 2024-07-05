@@ -2,15 +2,6 @@ import prisma from "../prisma/client";
 import * as bcrypt from "bcrypt";
 
 async function main() {
-  // Delete all existing data
-  await prisma.report.deleteMany({});
-  await prisma.activity.deleteMany({});
-  await prisma.event.deleteMany({});
-  await prisma.organizationDetail.deleteMany({});
-  await prisma.volunteerDetail.deleteMany({});
-  await prisma.user.deleteMany({});
-  await prisma.categoryEvent.deleteMany({});
-
   const hashedPassword = await bcrypt.hash("password", 10);
 
   // Create Users with different roles
@@ -87,20 +78,16 @@ async function main() {
       name: "Mitra Organization",
       address: "123 Mitra Street",
       focus: "Community Development",
-      description:
-        "Mitra Organization focuses on community development projects.",
+      description: "Mitra Organization focuses on community development projects.",
     },
   });
 
   // Create CategoryEvents
-  const categories = await prisma.categoryEvent.createMany({
+  await prisma.categoryEvent.createMany({
     data: [
       { name: "Education", description: "Events related to education." },
       { name: "Health", description: "Events related to health." },
-      {
-        name: "Environment",
-        description: "Events related to environmental conservation.",
-      },
+      { name: "Environment", description: "Events related to environmental conservation." },
     ],
   });
 
@@ -125,8 +112,7 @@ async function main() {
       slots_available: 10,
       category_id: educationCategory?.id,
       status: "open_registration",
-      image:
-        "https://res.cloudinary.com/df5zedkiz/image/upload/v1717301562/ogjfetkcpj0vfgcmqppc.jpg",
+      image: "https://res.cloudinary.com/df5zedkiz/image/upload/v1717301562/ogjfetkcpj0vfgcmqppc.jpg",
     },
   });
 
@@ -141,8 +127,7 @@ async function main() {
       slots_available: 5,
       category_id: healthCategory?.id,
       status: "open_registration",
-      image:
-        "https://res.cloudinary.com/df5zedkiz/image/upload/v1717299213/ovhkjb3natpbsoyh3z0c.jpg",
+      image: "https://res.cloudinary.com/df5zedkiz/image/upload/v1717299213/ovhkjb3natpbsoyh3z0c.jpg",
     },
   });
 

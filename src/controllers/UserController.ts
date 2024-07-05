@@ -728,6 +728,66 @@ const softDeleteUser = async (req: Request, res: Response) => {
   }
 };
 
+const refreshToken = async (req: Request, res: Response) => {
+  try {
+    const refreshToken = req.headers["authorization"]?.split(" ")[1];
+    if (!refreshToken) {
+      return res.status(401).json({
+        status: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const result = Helper.extractToken(refreshToken);
+    if (!result) {
+      return res.status(401).json({
+        status: false,
+        message: "Unauthorized",
+      });
+    }
+
+    if (result.id) {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: result.id,
+        },
+      });
+      if (!user) {
+        return res.status(404).json({
+          status: false,
+          message: "User not found",
+        });
+      }
+
+      const dataUser = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+      };
+
+      const token = Helper.generateToken(dataUser);
+      const refreshToken = Helper.generateRefreshToken(dataUser);
+  
+      return res.status(200).json({
+        status: true,
+        message: "Token refreshed successfully",
+        data: {
+          token: token,
+          refreshToken: refreshToken,
+        },
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while refreshing the token",
+      error: error,
+    });
+  }
+};
+
 export default {
   loginUser,
   registerUser,
@@ -742,4 +802,5 @@ export default {
   deleteUser,
   softDeleteUser,
   updateUser,
+  refreshToken,
 };

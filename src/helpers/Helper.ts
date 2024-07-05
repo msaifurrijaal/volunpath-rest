@@ -37,7 +37,7 @@ const responseData = (
 
 const generateToken = (data: any): string => {
   const token = jwt.sign(data, process.env.JWT_TOKEN as string, {
-    expiresIn: "1h",
+    expiresIn: "2h",
   });
 
   return token;
@@ -45,7 +45,7 @@ const generateToken = (data: any): string => {
 
 const generateRefreshToken = (data: any): string => {
   const token = jwt.sign(data, process.env.JWT_REFRESH_TOKEN as string, {
-    expiresIn: "1d",
+    expiresIn: "30d",
   });
 
   return token;

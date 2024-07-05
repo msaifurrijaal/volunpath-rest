@@ -68,4 +68,10 @@ userRoutes.delete(
   Authorization.authorizeUserDelete,
   UserController.softDeleteUser
 );
+
+userRoutes.get(
+  "/auth/refresh-token",
+  UserController.refreshToken
+)
+
 export default userRoutes;
