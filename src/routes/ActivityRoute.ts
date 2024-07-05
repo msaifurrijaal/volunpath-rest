@@ -5,17 +5,9 @@ import ActivityValidation from "../middlewares/validations/ActivityValidation";
 
 const activityRoutes: Router = Router();
 
-activityRoutes.get(
-  "/activities",
-  Authorization.authenticate,
-  ActivityController.getAllActivities
-);
+activityRoutes.get("/activities", ActivityController.getAllActivities);
 
-activityRoutes.get(
-  "/activities/:id",
-  Authorization.authenticate,
-  ActivityController.getActivityById
-);
+activityRoutes.get("/activities/:id", ActivityController.getActivityById);
 
 activityRoutes.post(
   "/activities",
