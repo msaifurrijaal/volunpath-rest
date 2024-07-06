@@ -90,8 +90,6 @@ const registerUser = async (req: Request, res: Response) => {
       volunteerDetail,
     } = req.body;
 
-    console.log(req.body);
-
     const hashedPass = await AuthHelper.passwordHashing(password);
 
     const newUser = await prisma.user.create({
@@ -769,7 +767,7 @@ const refreshToken = async (req: Request, res: Response) => {
 
       const token = Helper.generateToken(dataUser);
       const refreshToken = Helper.generateRefreshToken(dataUser);
-  
+
       return res.status(200).json({
         status: true,
         message: "Token refreshed successfully",

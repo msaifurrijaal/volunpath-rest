@@ -128,7 +128,7 @@ async function main() {
       category_id: educationCategory?.id,
       status: "open_registration",
       image:
-        "https://res.cloudinary.com/df5zedkiz/image/upload/v1717301562/ogjfetkcpj0vfgcmqppc.jpg",
+        "https://res.cloudinary.com/df5zedkiz/image/upload/v1717299213/ovhkjb3natpbsoyh3z0c.jpg",
     },
   });
 
@@ -145,7 +145,7 @@ async function main() {
       category_id: healthCategory?.id,
       status: "open_registration",
       image:
-        "https://res.cloudinary.com/df5zedkiz/image/upload/v1717299213/ovhkjb3natpbsoyh3z0c.jpg",
+        "https://res.cloudinary.com/df5zedkiz/image/upload/v1717301562/ogjfetkcpj0vfgcmqppc.jpg",
     },
   });
 
